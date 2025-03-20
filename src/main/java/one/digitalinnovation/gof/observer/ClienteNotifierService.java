@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -23,8 +25,11 @@ public class ClienteNotifierService {
 
     @PostConstruct
     public void init(){
+        listeners = new HashMap<>();
+        listeners.put(ClienteEventEnum.LOG, new ArrayList<>());
+        listeners.put(ClienteEventEnum.ENVIAR_EMAIL, new ArrayList<>());
         subscribe(ClienteEventEnum.LOG, beanFactory.getBean(ClienteLogService.class));
-        subscribe(ClienteEventEnum.LOG, beanFactory.getBean(ClienteLogService.class));
+        subscribe(ClienteEventEnum.ENVIAR_EMAIL, beanFactory.getBean(EnviarEmailClienteService.class));
     }
 
     public void subscribe(final ClienteEventEnum eventType, ClienteEventListener listener){
