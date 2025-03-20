@@ -9,7 +9,10 @@ import one.digitalinnovation.gof.repository.EnderecoRepository;
 import one.digitalinnovation.gof.service.ClienteService;
 import one.digitalinnovation.gof.service.ViaCepService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
 
@@ -45,30 +48,35 @@ public class ClienteServiceImpl implements ClienteService {
 	@Override
 	public Cliente buscarPorId(Long id) {
 		// Buscar Cliente por ID.
-		Optional<Cliente> cliente = clienteRepository.findById(id);
+		Optional<Cliente> cliente = clienteRepository.findByIdAndAtivoIsTrue(id);
 		return cliente.get();
 	}
 
 	@Override
+	@Transactional
 	public void inserir(Cliente cliente) {
 		salvarClienteComCep(cliente);
-		clienteNotifierService.notify(ClienteEventEnum.LOG, cliente);
 	}
 
 	@Override
+	@Transactional
 	public void atualizar(Long id, Cliente cliente) {
-		// Buscar Cliente por ID, caso exista:
-		Optional<Cliente> clienteBd = clienteRepository.findById(id);
-		if (clienteBd.isPresent()) {
+		if (clienteRepository.existsByIdAndAtivoIsTrue(id)) {
+			cliente.setId(id);
 			salvarClienteComCep(cliente);
 		}
 	}
 
 	@Override
+	@Transactional
 	public void deletar(Long id) {
 		// Deletar Cliente por ID.
-		Cliente cliente = buscarPorId(id);
-		clienteRepository.delete(cliente);
+		Cliente cliente = clienteRepository.findByIdAndAtivoIsTrue(id)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+						"Cliente não encontrado"));
+
+		cliente.setAtivo(false);
+		clienteRepository.save(cliente);
 		clienteNotifierService.notify(ClienteEventEnum.LOG, cliente);
 		clienteNotifierService.notify(ClienteEventEnum.ENVIAR_EMAIL, cliente);
 	}
@@ -76,7 +84,7 @@ public class ClienteServiceImpl implements ClienteService {
 	private void salvarClienteComCep(Cliente cliente) {
 		// Verificar se o Endereco do Cliente já existe (pelo CEP).
 		String cep = cliente.getEndereco().getCep();
-		Endereco endereco = enderecoRepository.findById(cep).orElseGet(() -> {
+		Endereco endereco = enderecoRepository.findByCep(cep).orElseGet(() -> {
 			// Caso não exista, integrar com o ViaCEP e persistir o retorno.
 			Endereco novoEndereco = viaCepService.consultarCep(cep);
 			if (cliente.getId() != null) {

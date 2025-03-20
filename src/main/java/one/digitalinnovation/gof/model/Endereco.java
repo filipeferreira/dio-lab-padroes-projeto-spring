@@ -1,6 +1,9 @@
 package one.digitalinnovation.gof.model;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import java.util.Objects;
 
@@ -17,6 +20,10 @@ import java.util.Objects;
 public class Endereco {
 
 	@Id
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	private Long id;
+
+	@Column(nullable = false, unique = true)
 	private String cep;
 	private String logradouro;
 	private String complemento;
@@ -27,6 +34,14 @@ public class Endereco {
 	private String gia;
 	private String ddd;
 	private String siafi;
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
 
 	public String getCep() {
 		return cep;
@@ -109,9 +124,22 @@ public class Endereco {
 	}
 
 	@Override
+	public boolean equals(Object o) {
+		if (!(o instanceof Endereco)) return false;
+		Endereco endereco = (Endereco) o;
+		return Objects.equals(id, endereco.id) && Objects.equals(cep, endereco.cep) && Objects.equals(logradouro, endereco.logradouro) && Objects.equals(complemento, endereco.complemento) && Objects.equals(bairro, endereco.bairro) && Objects.equals(localidade, endereco.localidade) && Objects.equals(uf, endereco.uf) && Objects.equals(ibge, endereco.ibge) && Objects.equals(gia, endereco.gia) && Objects.equals(ddd, endereco.ddd) && Objects.equals(siafi, endereco.siafi);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(id, cep, logradouro, complemento, bairro, localidade, uf, ibge, gia, ddd, siafi);
+	}
+
+	@Override
 	public String toString() {
 		return "Endereco{" +
-				"cep='" + cep + '\'' +
+				"id=" + id +
+				", cep='" + cep + '\'' +
 				", logradouro='" + logradouro + '\'' +
 				", complemento='" + complemento + '\'' +
 				", bairro='" + bairro + '\'' +
@@ -122,17 +150,5 @@ public class Endereco {
 				", ddd='" + ddd + '\'' +
 				", siafi='" + siafi + '\'' +
 				'}';
-	}
-
-	@Override
-	public boolean equals(Object o) {
-		if (!(o instanceof Endereco)) return false;
-		Endereco endereco = (Endereco) o;
-		return Objects.equals(cep, endereco.cep) && Objects.equals(logradouro, endereco.logradouro) && Objects.equals(complemento, endereco.complemento) && Objects.equals(bairro, endereco.bairro) && Objects.equals(localidade, endereco.localidade) && Objects.equals(uf, endereco.uf) && Objects.equals(ibge, endereco.ibge) && Objects.equals(gia, endereco.gia) && Objects.equals(ddd, endereco.ddd) && Objects.equals(siafi, endereco.siafi);
-	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(cep, logradouro, complemento, bairro, localidade, uf, ibge, gia, ddd, siafi);
 	}
 }

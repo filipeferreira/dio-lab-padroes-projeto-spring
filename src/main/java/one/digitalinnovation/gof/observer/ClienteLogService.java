@@ -21,13 +21,15 @@ public class ClienteLogService implements ClienteEventListener {
         var clienteLog = new ClienteLog();
         clienteLog.setId(cliente.getId());
         clienteLog.setCliente(cliente);
-        clienteLog.setEndereco(clienteLog.getEndereco());
+        clienteLog.setIdEndereco(cliente.getEndereco().getId());
         clienteLog.setNome(cliente.getNome());
         clienteLog.setOperacao(getOperacaoEnum(cliente));
         clienteLog.setDataHoraLog(LocalDateTime.now());
         clienteLog.setAtivo(cliente.isAtivo());
 
         clienteLogRepository.save(clienteLog);
+
+        System.out.println("Cliente log salvo com sucesso!");
 
     }
 

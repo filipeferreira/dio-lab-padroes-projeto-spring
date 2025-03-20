@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 public class ClienteLog {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
 	@ManyToOne
@@ -25,8 +25,11 @@ public class ClienteLog {
 	@Column(nullable = false)
 	private String nome;
 
+	@Column(name = "id_endereco", nullable = false)
+	private Long idEndereco;
+
 	@ManyToOne
-	@JoinColumn(name = "id_endereco", nullable = false)
+	@JoinColumn(name = "id_endereco", insertable = false, updatable = false)
 	private Endereco endereco;
 
 	@Column(name = "data_hora_log", nullable = false)
@@ -60,6 +63,14 @@ public class ClienteLog {
 
 	public void setNome(String nome) {
 		this.nome = nome;
+	}
+
+	public Long getIdEndereco() {
+		return idEndereco;
+	}
+
+	public void setIdEndereco(Long idEndereco) {
+		this.idEndereco = idEndereco;
 	}
 
 	public Endereco getEndereco() {
