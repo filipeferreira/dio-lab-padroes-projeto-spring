@@ -1,16 +1,17 @@
 package one.digitalinnovation.gof.service.impl;
 
-import java.util.Optional;
-
+import one.digitalinnovation.gof.enums.ClienteEventEnum;
+import one.digitalinnovation.gof.model.Cliente;
+import one.digitalinnovation.gof.model.Endereco;
+import one.digitalinnovation.gof.observer.ClienteNotifierService;
+import one.digitalinnovation.gof.repository.ClienteRepository;
+import one.digitalinnovation.gof.repository.EnderecoRepository;
+import one.digitalinnovation.gof.service.ClienteService;
+import one.digitalinnovation.gof.service.ViaCepService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import one.digitalinnovation.gof.model.Cliente;
-import one.digitalinnovation.gof.model.ClienteRepository;
-import one.digitalinnovation.gof.model.Endereco;
-import one.digitalinnovation.gof.model.EnderecoRepository;
-import one.digitalinnovation.gof.service.ClienteService;
-import one.digitalinnovation.gof.service.ViaCepService;
+import java.util.Optional;
 
 /**
  * Implementação da <b>Strategy</b> {@link ClienteService}, a qual pode ser
@@ -29,6 +30,8 @@ public class ClienteServiceImpl implements ClienteService {
 	private EnderecoRepository enderecoRepository;
 	@Autowired
 	private ViaCepService viaCepService;
+	@Autowired
+	private ClienteNotifierService clienteNotifierService;
 	
 	// Strategy: Implementar os métodos definidos na interface.
 	// Facade: Abstrair integrações com subsistemas, provendo uma interface simples.
@@ -49,6 +52,7 @@ public class ClienteServiceImpl implements ClienteService {
 	@Override
 	public void inserir(Cliente cliente) {
 		salvarClienteComCep(cliente);
+		clienteNotifierService.notify(ClienteEventEnum.LOG, cliente);
 	}
 
 	@Override
@@ -63,7 +67,10 @@ public class ClienteServiceImpl implements ClienteService {
 	@Override
 	public void deletar(Long id) {
 		// Deletar Cliente por ID.
-		clienteRepository.deleteById(id);
+		Cliente cliente = buscarPorId(id);
+		clienteRepository.delete(cliente);
+		clienteNotifierService.notify(ClienteEventEnum.LOG, cliente);
+		clienteNotifierService.notify(ClienteEventEnum.ENVIAR_EMAIL, cliente);
 	}
 
 	private void salvarClienteComCep(Cliente cliente) {
@@ -72,12 +79,16 @@ public class ClienteServiceImpl implements ClienteService {
 		Endereco endereco = enderecoRepository.findById(cep).orElseGet(() -> {
 			// Caso não exista, integrar com o ViaCEP e persistir o retorno.
 			Endereco novoEndereco = viaCepService.consultarCep(cep);
+			if (cliente.getId() != null) {
+				clienteNotifierService.notify(ClienteEventEnum.ENVIAR_EMAIL, cliente);
+			}
 			enderecoRepository.save(novoEndereco);
 			return novoEndereco;
 		});
 		cliente.setEndereco(endereco);
 		// Inserir Cliente, vinculando o Endereco (novo ou existente).
 		clienteRepository.save(cliente);
+		clienteNotifierService.notify(ClienteEventEnum.LOG, cliente);
 	}
 
 }

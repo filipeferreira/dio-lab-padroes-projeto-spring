@@ -2,6 +2,7 @@ package one.digitalinnovation.gof.model;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import java.util.Objects;
 
 /**
  * Os atributos desse modelo foram gerados automaticamente pelo site
@@ -107,4 +108,31 @@ public class Endereco {
 		this.siafi = siafi;
 	}
 
+	@Override
+	public String toString() {
+		return "Endereco{" +
+				"cep='" + cep + '\'' +
+				", logradouro='" + logradouro + '\'' +
+				", complemento='" + complemento + '\'' +
+				", bairro='" + bairro + '\'' +
+				", localidade='" + localidade + '\'' +
+				", uf='" + uf + '\'' +
+				", ibge='" + ibge + '\'' +
+				", gia='" + gia + '\'' +
+				", ddd='" + ddd + '\'' +
+				", siafi='" + siafi + '\'' +
+				'}';
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (!(o instanceof Endereco)) return false;
+		Endereco endereco = (Endereco) o;
+		return Objects.equals(cep, endereco.cep) && Objects.equals(logradouro, endereco.logradouro) && Objects.equals(complemento, endereco.complemento) && Objects.equals(bairro, endereco.bairro) && Objects.equals(localidade, endereco.localidade) && Objects.equals(uf, endereco.uf) && Objects.equals(ibge, endereco.ibge) && Objects.equals(gia, endereco.gia) && Objects.equals(ddd, endereco.ddd) && Objects.equals(siafi, endereco.siafi);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(cep, logradouro, complemento, bairro, localidade, uf, ibge, gia, ddd, siafi);
+	}
 }
